@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
+<struts>
+	<package name="admin" namespace="/" extends="struts-default">
+		<action name="admin_*" class="com.lanou.admin.controller.AdminAction" method="{1}">
+			<result name="success">/AddItem.jsp</result>
+			<result name="fail">/fail.jsp</result>
+			<result name="ok">/show.jsp</result>
+			<result name="no">/fail.jsp</result>
+			<result name="shan">/success.jsp</result>
+			<result name="gai">/success.jsp</result>
+			<result name="aa">/show.jsp</result>
+			<result name="modifyItem">/ModifyItem.jsp</result>
+			<result name = "seeUserSuccess">/userList.jsp</result>
+			<result name = "adminExitSuccess">/login1.jsp</result>
+			<allowed-methods>login,add,shan,gai,dispItem,update,deleteItem,zhijie,seeUser,adminExit</allowed-methods>
+		</action>
+		
+		<action name="user_*"  class = "com.lanou.user.controller.UserAction" method = "{1}">
+			<result name = "registerSuccess">/login.jsp</result>
+			<result name = "registerFail">/registration.jsp</result>
+			<result name = "loginSuccess">/index.jsp</result>
+			<result name = "loginFail">/login.jsp</result>
+			<result name = "updateFail">/registration.jsp</result>
+			<result name = "updateSuccess">/index.jsp</result>
+			<result name = "exitSuccess">/login.jsp</result>
+			<result name = "findItemSuccess">/exam.jsp</result>
+			<result name = "upAnswerSuccess">/result.jsp</result>
+			<result name = "seeScoreSuccess">/scoreList.jsp</result>
+			<result name = "goSuccess">/go.jsp</result>
+			<allowed-methods>register,login,update,exit,upAnswer,findItem,seeScore,go</allowed-methods>
+		</action>
+	</package>
+	
+	
+</struts>

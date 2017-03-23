@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<!-- 1.连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+		<property name="jdbcUrl"
+			value="jdbc:mysql://localhost:3306/entity?characterEncoding=utf-8"></property>
+		<property name="user" value="root"></property>
+		<property name="password" value="root"></property>
+		<!-- <property name ="maxPoolSize" value = "20" /> <property name ="minPoolSize" 
+			value = "10" /> -->
+	</bean>
+
+	<!-- 2.获取SessionFactory -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<!-- 注入连接池 -->
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 映射文件的配置 -->
+		<property name="annotatedClasses">
+			<list>
+				<!-- mapping的xml -->
+				<value>com.lanou.entity.Item</value>
+				<value>com.lanou.entity.Admin</value>
+				<value>com.lanou.entity.User</value>
+				<value>com.lanou.entity.Item</value>
+				<value>com.lanou.entity.Score</value>
+			</list>
+		</property>
+		<!-- hibernate的配置 -->
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+			</props>
+		</property>
+	</bean>
+
+
+
+	<!-- hibernateTemplate 模板——封装了CRUD -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<!-- dao 操作只需要注入模板 -->
+	<bean id="itemDao" class="com.lanou.dao.ItemDao">
+		<property name="tp" ref="hibernateTemplate"></property>
+	</bean>
+
+	<bean id="loginDao" class="com.lanou.dao.LoginDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate"></property>
+	</bean>
+
+	<bean id="itemService" class="com.lanou.service.impl.ItemServiceImpl">
+		<property name="itemdao" ref="itemDao"></property>
+	</bean>
+	<bean id="loginService" class="com.lanou.service.impl.LoginServiceImpl">
+		<property name="loginDao" ref="loginDao"></property>
+	</bean>
+
+	<bean id="adminAction" class="com.lanou.admin.controller.AdminAction">
+		<property name="itemService" ref="itemService"></property>
+		<property name="loginService" ref="loginService"></property>
+	</bean>
+
+	<bean id="userDao" class="com.lanou.dao.UserDao">
+		<property name="template" ref="hibernateTemplate"></property>
+	</bean>
+
+	<bean id="userService" class="com.lanou.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"></property>
+	</bean>
+	<!-- <bean id="score" class="com.lanou.entity.Score"></bean> -->
+	<bean id="userAction" class="com.lanou.user.controller.UserAction">
+		<!-- <property name="template" ref="hibernateTemplate"></property> -->
+		<property name="userService" ref="userService"></property>
+		<!-- <property name="score" ref="score"> </property> -->
+	</bean>
+
+
+
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<!-- 设置属性 -->
+		<tx:attributes>
+			<!-- 属性 -->
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="m*" propagation="REQUIRED" />
+			<tx:method name="u*" propagation="REQUIRED" />
+			<tx:method name="s*" propagation="REQUIRED" />
+			<tx:method name="find*" read-only="true" propagation="NOT_SUPPORTED" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 通过AOP实现事务管理 -->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.lanou.service.impl.*.*(..))"
+			id="b" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="b" />
+	</aop:config>
+</beans>
